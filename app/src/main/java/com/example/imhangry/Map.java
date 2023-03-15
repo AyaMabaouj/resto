@@ -71,10 +71,10 @@ public class Map extends AppCompatActivity {
                 .findFragmentById(R.id.map);
 
         //initialize array of place type
-        String[] placeTypeList = {"catering.restaurant"};
+        String[] placeTypeList = {"restaurant", "cafe"};
 
         //initialize array of place name
-        String[] placeNameList = {"Restaurant"};
+        String[] placeNameList = {"Restaurant", "Cafe"};
 
 
         //set adapter on spnner
@@ -107,11 +107,12 @@ public class Map extends AppCompatActivity {
                 //get selected position of spinner
                 int i = spType.getSelectedItemPosition();
                 //initialize url
-                String url = "https://api.geoapify.com/v2/places" + //url
-                        "?categories=" + placeTypeList[i] + //place type
-                        "&filter=place:" + currentLat + " , " + currentLong + //location lat lng
-                        "&lang=fr"+"&limit=20"+//sensor
-                        "&apiKey" + getResources().getString(R.string.map_key);
+                String url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json" +
+                        "?location=" + currentLat + " , " + currentLong + //location lat lng
+                        "&radius=5000" + //nearby radius
+                        "&types=" + placeTypeList[i] + //place type
+                        "&sensor=true" + //sensor
+                        "&key=" + getResources().getString(R.string.map_key);
 
                 //execute place task method to download json data
                 new PlaceTask().execute(url);
