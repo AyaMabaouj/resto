@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">I\'m Hungry</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="google_map">Google Map</string>
+    <string name="find">Chercher</string>
+    <string name="food">"Envie d'une expérience culinaire inoubliable ? Découvrez les meilleurs restaurants de la ville en un rien de temps avec notre application de recherche de restaurants. Que vous soyez à la recherche d'un lieu romantique pour un rendez-vous, d'un endroit confortable pour un repas en famille ou simplement d'une cuisine savoureuse pour satisfaire vos papilles, notre application vous permettra de trouver rapidement et facilement des restaurants qui répondent à vos envies. Avec des critiques et des recommandations d'utilisateurs fiables, des menus complets et des options de réservation pratiques, vous serez sûr de passer un moment mémorable à chaque fois que vous utiliserez notre application pour trouver votre prochain repas."</string>
+    <string name="change_language">Changer de langue</string>
+    <string name="go_to_map">Aller à la carte</string>
+
+</resources>

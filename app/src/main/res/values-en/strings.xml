@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">I\'m Hungry</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="google_map">Google Map</string>
+    <string name="find">Search</string>
+    <string name="food">"Fancy an unforgettable dining experience? Discover the best restaurants in town in no time with our restaurant finder app. Whether you're looking for a romantic spot for a date, a comfortable for a family meal or simply tasty cuisine to satisfy your taste buds, our app will make it quick and easy to find restaurants that suit your cravings.With reviews and recommendations from trusted users, comprehensive menus and convenient reservation options, you'll be sure to have a memorable time every time you use our app to find your next meal."</string>
+    <string name="change_language">Change Language</string>
+    <string name="go_to_map">go to map</string>
+</resources>
