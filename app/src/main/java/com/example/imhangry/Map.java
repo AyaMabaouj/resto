@@ -2,6 +2,7 @@ package com.example.imhangry;
 
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,12 +11,16 @@ import androidx.core.content.ContextCompat;
 
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Location;
+import android.location.LocationManager;
+import android.media.audiofx.EnvironmentalReverb;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -59,6 +64,7 @@ public class Map extends AppCompatActivity {
     GoogleMap map;
     FusedLocationProviderClient fusedLocationProviderClient;
     double currentLat = 0, currentLong = 0;
+    private int GPS_REQUEST_CODE = 9001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,7 +149,8 @@ public class Map extends AppCompatActivity {
                         currentLong = location.getLongitude();
 
                         //sync map
-                        supportMapFragment.getMapAsync(new OnMapReadyCallback(){
+                        if(isGPSenable()){
+                            supportMapFragment.getMapAsync(new OnMapReadyCallback(){
                             @Override
                             public  void onMapReady(GoogleMap googleMap){
                                 //whe map is ready
@@ -154,7 +161,7 @@ public class Map extends AppCompatActivity {
                                 ));
                             }
 
-                        });
+                        });}
 
                     }
 
@@ -162,7 +169,24 @@ public class Map extends AppCompatActivity {
             });
 
         }}
+public boolean isGPSenable(){
+    LocationManager locationManager= (LocationManager) getSystemService(LOCATION_SERVICE);
+    boolean providerEnable = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    if(providerEnable){
+        return true;
+    }else {
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setTitle("GPS permession")
+                .setMessage("GPS is required for this app to work. please enable GPS")
+                .setPositiveButton("yes",((dialogInterface,i)->{
+                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivityForResult(intent,GPS_REQUEST_CODE);
+                })).setCancelable(false).show();
 
+    }
+        return false;
+
+}
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -279,60 +303,19 @@ public class Map extends AppCompatActivity {
             }
         }
     }
-    public class JsonParser {
-        private HashMap<String, String> parserJsonObject(JSONObject object) {
-            //initialize hash map
-            HashMap<String, String> dataList = new HashMap<>();
 
-            try {
-                //get name from object
-                String name = object.getString("name");
-                //get latitude from object
-                String latitude = object.getJSONObject("geometry")
-                        .getJSONObject("location").getString("lat");
-                //get longitude from object
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == GPS_REQUEST_CODE){
+            LocationManager locationManager= (LocationManager) getSystemService(LOCATION_SERVICE);
+            boolean providerEnable = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        if(providerEnable){
+            Toast.makeText(this,"GPS is Enable", Toast.LENGTH_LONG).show();
+        }else{
+            Toast.makeText(this,"GPS is not Enable", Toast.LENGTH_LONG).show();
 
-                String longitude = object.getJSONObject("geometry")
-                        .getJSONObject("location").getString("lng");
-                //put all value in hash map
-                dataList.put("name", name);
-                dataList.put("lat", latitude);
-                dataList.put("lng", longitude);
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-
-            return dataList;
         }
-        private List<HashMap<String,String>> parseJsonArray(JSONArray jsonArray){
-            //initialize hesh map list
-            List<HashMap<String,String>> datalist = new ArrayList<>();
-            for (int i=0; i<jsonArray.length();i++){
-                try {
-                    //initialize hash map
-                    HashMap<String,String> data = parserJsonObject((JSONObject) jsonArray.get(i));
-//add data in hash map list
-                    datalist.add(data);
-                }catch (JSONException e){
-                    e.printStackTrace();
-                }
-            }
-            //return hash map list
-            return  datalist;
-        }
-        public  List<HashMap<String,String>> parseResult(JSONObject object){
-            //initialize json array
-            JSONArray jsonArray = null;
-            //get result array
-
-            try {
-                jsonArray= object.getJSONArray("results");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return parseJsonArray(jsonArray);
         }
     }
 }

@@ -5,17 +5,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".HomePage"
-    android:background="#F8F7F0">
+    android:background="#F3F2F1">
 
     <pl.droidsonroids.gif.GifImageView
         android:layout_width="300dp"
-        android:layout_height="350dp"
+        android:layout_height="250dp"
         android:layout_gravity="center"
-        android:background="@drawable/mouth_watering_tasty"
+        android:background="@drawable/inboundid_inbound"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
         tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteY="72dp"></pl.droidsonroids.gif.GifImageView>
+        tools:layout_editor_absoluteY="34dp"></pl.droidsonroids.gif.GifImageView>
 
     <TextView
         android:id="@+id/txt"
@@ -24,6 +25,7 @@
         android:layout_gravity="center"
         android:backgroundTint="#FFC107"
         android:gravity="center"
+        android:padding="15dp"
         android:text="@string/food"
         android:textColor="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -31,7 +33,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.76"></TextView>
+        app:layout_constraintVertical_bias="0.567"></TextView>
 
     <Button
         android:id="@+id/btn"
@@ -43,10 +45,10 @@
         android:text="@string/go_to_map"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.539"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.896"></Button>
+        app:layout_constraintVertical_bias="0.762"></Button>
 
     <Button
         android:id="@+id/btnChange"
@@ -58,8 +60,7 @@
         android:text="@string/change_language"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.543"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.976" />
+        app:layout_constraintVertical_bias="0.847" />
 </androidx.constraintlayout.widget.ConstraintLayout>
