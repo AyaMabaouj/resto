@@ -8,13 +8,21 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.media.audiofx.EnvironmentalReverb;
@@ -24,18 +32,24 @@ import android.provider.Settings;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.PopupMenu;
 import android.widget.Spinner;
 
+import com.example.imhangry.databinding.ActivityHomePageBinding;
+import com.example.imhangry.databinding.ActivityMapBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import android.Manifest;
 import android.widget.Toast;
@@ -65,14 +79,68 @@ public class Map extends AppCompatActivity {
     FusedLocationProviderClient fusedLocationProviderClient;
     double currentLat = 0, currentLong = 0;
     private int GPS_REQUEST_CODE = 9001;
+    private ActivityMapBinding binding;
+    private boolean  isTrafficEnable;
+    private Location location;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_map);
+        binding = ActivityMapBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
         //Assign varibale
         spType = findViewById(R.id.sp_type);
         btFind = findViewById(R.id.btn_find);
+        FloatingActionButton fab = findViewById(R.id.cLo);
+        ColorStateList csl = ColorStateList.valueOf(getResources().getColor(R.color.orange));
+        fab.setImageTintList(csl);
+        FloatingActionButton fb = findViewById(R.id.btnMapType);
+        ColorStateList cs = ColorStateList.valueOf(getResources().getColor(R.color.orange));
+        fb.setImageTintList(cs);
+        binding.btnMapType.setOnClickListener(view -> {
+            PopupMenu popupMenu = new PopupMenu(this, view);
+            popupMenu.getMenuInflater().inflate(R.menu.map_type_menu, popupMenu.getMenu());
+
+
+            popupMenu.setOnMenuItemClickListener(item -> {
+                switch (item.getItemId()) {
+                    case R.id.btnNormal:
+                        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                        break;
+
+                    case R.id.btnSatellite:
+                        map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                        break;
+
+                    case R.id.btnTerrain:
+                        map.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                        break;
+                }
+                return true;
+            });
+
+            popupMenu.show();
+        });
+        binding.enableTraffic.setOnClickListener(view -> {
+
+            if (isTrafficEnable) {
+                if (map != null) {
+                    map.setTrafficEnabled(false);
+                    isTrafficEnable = false;
+                }
+            } else {
+                if (map != null) {
+                    map.setTrafficEnabled(true);
+                    isTrafficEnable = true;
+                }
+            }
+
+        });
+
+
+        binding.cLo.setOnClickListener(location -> getCurrentLocation());
         supportMapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
 
@@ -125,7 +193,6 @@ public class Map extends AppCompatActivity {
 
             }
         });
-
     }
 
 
@@ -138,34 +205,52 @@ public class Map extends AppCompatActivity {
             task.addOnSuccessListener(new OnSuccessListener<Location>() {
                 @Override
                 public void onSuccess(Location location) {
-                    //when sucess
-                    if ((location != null)) {
-
-                        //when location is not equal to null
-                        //get current lattitude
+                    //when success
+                    if (location != null) {
+                        //when location is not null
+                        //get current latitude
                         currentLat = location.getLatitude();
-
                         //get current longitude
                         currentLong = location.getLongitude();
 
                         //sync map
-                        if(isGPSenable()){
-                            supportMapFragment.getMapAsync(new OnMapReadyCallback(){
-                            @Override
-                            public  void onMapReady(GoogleMap googleMap){
-                                //whe map is ready
-                                map=googleMap;
-                                //zoom current location on map
-                                map.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                                        new LatLng(currentLat,currentLong),10
-                                ));
-                            }
+                        if (isGPSenable()) {
+                            supportMapFragment.getMapAsync(new OnMapReadyCallback() {
+                                @Override
+                                public void onMapReady(GoogleMap googleMap) {
+                                    //when map is ready
+                                    map = googleMap;
+                                    //zoom current location on map
+                                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                                            new LatLng(currentLat, currentLong), 12));
 
-                        });}
+                                    //reverse geocode to get the name of the current location
+                                    Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+                                    try {
+                                        List<Address> addresses = geocoder.getFromLocation(currentLat, currentLong, 1);
+                                        if (addresses != null && addresses.size() > 0) {
+                                            Address address = addresses.get(0);
+                                            String locationName = address.getAddressLine(0);
+                                            //add location name to the map as a marker
+                                            map.addMarker(new MarkerOptions()
+                                                    .position(new LatLng(currentLat, currentLong))
+                                                    .title(locationName).
+                                                    icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
 
+                                        }
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                        }
                     }
+                };
 
-                }
+
+
+
+
             });
 
         }}
@@ -297,11 +382,23 @@ public boolean isGPSenable(){
                 options.position(latLng);
                 //set title
                 options.title(name);
+               options.icon(getCustomIcon());
                 //app marker on map
                 map.addMarker(options);
 
             }
         }
+    }
+    private BitmapDescriptor getCustomIcon() {
+        Drawable background = ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_baseline_location_on_24);
+        background.setColorFilter(ContextCompat.getColor(getApplicationContext(), R.color.orge), android.graphics.PorterDuff.Mode.SRC_IN);
+        int width = (int) (background.getIntrinsicWidth() * 1.5); // multiplier la largeur par un facteur d'échelle
+        int height = (int) (background.getIntrinsicHeight() * 1.5); // multiplier la hauteur par un facteur d'échelle
+        background.setBounds(0, 0, width, height);
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444);
+        Canvas canvas = new Canvas(bitmap);
+        background.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
     @Override
